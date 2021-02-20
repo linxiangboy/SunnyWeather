@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--scrollbars不显示滚动条    overScrollMode过度滚动-->
+<ScrollView
+    android:id="@+id/weatherLayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="none"
+    android:overScrollMode="never"
+    android:visibility="invisible"
+    >
+
+    <!--由于ScrollView内部只允许存在一个直接子布局，所以嵌套了一个垂直方向的LinearLayout-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+
+        <include
+            android:id="@+id/now"
+            layout="@layout/now"/>
+
+        <include
+            android:id="@+id/forecast"
+            layout="@layout/forecast"/>
+
+        <include
+            android:id="@+id/life_index"
+            layout="@layout/life_index"/>
+
+    </LinearLayout>
+
+</ScrollView>
