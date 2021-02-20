@@ -1,5 +1,6 @@
 package com.sunnyweather.android.ui.weather
 
+import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -9,8 +10,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.sunnyweather.android.R
@@ -26,7 +30,7 @@ class WeatherActivity : AppCompatActivity() {
 
     lateinit var mBinding: ActivityWeatherBinding
 
-    private val viewModel by lazy {
+    val viewModel by lazy {
         ViewModelProvider(this, ViewModelProvider.NewInstanceFactory()).get(WeatherViewModel::class.java)
     }
 
@@ -62,6 +66,29 @@ class WeatherActivity : AppCompatActivity() {
             }
             mBinding.swipeRefresh.isRefreshing = false //下拉刷新结束,隐藏进度条
         })
+
+        //打开DrawerLayout
+        mBinding.now.navBtn.setOnClickListener { mBinding.drawerLayout.openDrawer(GravityCompat.START) }
+        //DrawerLayout点击事件
+        mBinding.drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerStateChanged(newState: Int) { //在drawerLayout状态发生切换的时候执行，一次时状态刚发生改变的时候，一次是状态改变彻底完成的时候
+
+            }
+
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) { //在状态发生改变的时候一直执行
+
+            }
+
+            override fun onDrawerOpened(drawerView: View) { //drawer打开的时候执行
+
+            }
+
+            override fun onDrawerClosed(drawerView: View) { //drawer关闭的时候执行
+                val manager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                manager.hideSoftInputFromWindow(drawerView.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+            }
+        })
+
         mBinding.swipeRefresh.setColorSchemeResources(R.color.colorPrimary) //设置下拉刷新进度条显示颜色
         refreshWeather() //执行一次网络请求并显示下拉控件进度条
         mBinding.swipeRefresh.setOnRefreshListener { refreshWeather() }
@@ -112,7 +139,7 @@ class WeatherActivity : AppCompatActivity() {
         mBinding.weatherLayout.visibility = View.VISIBLE
     }
 
-    private fun refreshWeather(){
+    fun refreshWeather(){ //执行一次网络请求并显示下拉控件进度条
         viewModel.refreshWeather(viewModel.loactionLng, viewModel.locationLat)
         mBinding.swipeRefresh.isRefreshing = true
     }
