@@ -1,5 +1,6 @@
 package com.sunnyweather.android.ui.place
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.sunnyweather.android.Tool.showToast
 
 import com.sunnyweather.android.databinding.FragmentPlaceBinding
+import com.sunnyweather.android.ui.weather.WeatherActivity
 
 class PlaceFragment : Fragment() {
 
@@ -22,7 +24,7 @@ class PlaceFragment : Fragment() {
     * lazy 懒加载技术来获取PlaceViewModel实例
     * 允许我们在整个类中随时使用viewModel这个变量而完全不用关心它们何时初始化、是否为空等前提条件
     * */
-    private val viewModel by lazy {
+    val viewModel by lazy {
         ViewModelProvider(this, ViewModelProvider.NewInstanceFactory()).get(PlaceViewModel::class.java)
     }
 
@@ -39,8 +41,20 @@ class PlaceFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        val layoutManager = LinearLayoutManager(activity)
 
+        if (viewModel.isPlaceSaved()){
+            val place = viewModel.getSavedPlace()
+            val intent = Intent(context, WeatherActivity::class.java).apply {
+                putExtra("location_lng", place.location.lng)
+                putExtra("location_lat", place.location.lat)
+                putExtra("place_name", place.name)
+            }
+            startActivity(intent)
+            activity?.finish()
+            return
+        }
+
+        val layoutManager = LinearLayoutManager(activity)
         //给RecyclerView设置和layoutManager和适配器,并使用了viewModel.placeList集合作为数据源
         _binding?.recyclerView?.layoutManager = layoutManager
         adapter = PlaceAdapter(this, viewModel.placeList)

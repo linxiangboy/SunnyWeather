@@ -2,18 +2,13 @@ package com.sunnyweather.android.ui.place
 
 import android.content.Intent
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import com.sunnyweather.android.Tool.LogUtil
-import com.sunnyweather.android.Tool.showToast
 import com.sunnyweather.android.databinding.PlaceItemBinding
 import com.sunnyweather.android.logic.model.Place
 import com.sunnyweather.android.ui.weather.WeatherActivity
 
-class PlaceAdapter(private val fragment: Fragment, private val placeList: List<Place>) : RecyclerView.Adapter<PlaceAdapter.ViewHolder>() {
+class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: List<Place>) : RecyclerView.Adapter<PlaceAdapter.ViewHolder>() {
 
     class ViewHolder(val mbinding: PlaceItemBinding) : RecyclerView.ViewHolder(mbinding.root)
 
@@ -28,6 +23,11 @@ class PlaceAdapter(private val fragment: Fragment, private val placeList: List<P
                 putExtra("location_lat", place.location.lat)
                 putExtra("place_name", place.name)
             }
+
+            //点击任何子项布局时，在跳转到WeatherActivity之前，调用savePlace()方法存储选中的城市
+            //将传入的Fragment改成PlaceFragment，次啊能调用placeFragment对应的PlaceViewModel
+            fragment.viewModel.savePlace(place)
+
             fragment.startActivity(intent)
             fragment.activity?.finish()
         }

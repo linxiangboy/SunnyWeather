@@ -30,4 +30,13 @@ class PlaceViewModel  : ViewModel() {
         searchLiveData.value = query
     }
 
+    /*
+    * 在ViewModel中进行多一次封装
+    * */
+    fun savePlace(place: Place) = Repository.savePlace(place)
+
+    fun getSavedPlace() = Repository.getSavedPlace()
+
+    fun isPlaceSaved() = Repository.isPlacesSaved()
+
 }

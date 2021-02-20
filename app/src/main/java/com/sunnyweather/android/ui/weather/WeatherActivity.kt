@@ -38,7 +38,6 @@ class WeatherActivity : AppCompatActivity() {
         mBinding = ActivityWeatherBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-
         /*
         * 如果为空就先从Intent中取出经纬度坐标和地区名称
         * 并复制到WeatherViewModel相应的变量中，然后对weatherLiveData进行观察
@@ -61,9 +60,11 @@ class WeatherActivity : AppCompatActivity() {
                 "无法成功获取天气信息".showToast()
                 result.exceptionOrNull()?.printStackTrace()
             }
+            mBinding.swipeRefresh.isRefreshing = false //下拉刷新结束,隐藏进度条
         })
-        //执行一次刷新天气的请求
-        viewModel.refreshWeather(viewModel.loactionLng, viewModel.locationLat)
+        mBinding.swipeRefresh.setColorSchemeResources(R.color.colorPrimary) //设置下拉刷新进度条显示颜色
+        refreshWeather() //执行一次网络请求并显示下拉控件进度条
+        mBinding.swipeRefresh.setOnRefreshListener { refreshWeather() }
     }
 
     private fun showWeatherInfo(weather: Weather){
@@ -111,6 +112,11 @@ class WeatherActivity : AppCompatActivity() {
         mBinding.weatherLayout.visibility = View.VISIBLE
     }
 
+    private fun refreshWeather(){
+        viewModel.refreshWeather(viewModel.loactionLng, viewModel.locationLat)
+        mBinding.swipeRefresh.isRefreshing = true
+    }
+
 
     private fun hideSystemUI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -121,12 +127,14 @@ class WeatherActivity : AppCompatActivity() {
             }
         } else {
             @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+//            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN
+//                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+//                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+            //沉浸式状态栏(非透明)
+            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
         }
         window.statusBarColor = Color.TRANSPARENT // 将状态栏设置成透明色
     }
