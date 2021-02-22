@@ -1,8 +1,7 @@
 package com.sunnyweather.android.logic
 
 import androidx.lifecycle.liveData
-import com.sunnyweather.android.Tool.LogUtil
-import com.sunnyweather.android.logic.Repository.savePlace
+import com.sunnyweather.android.logic.dao.CityDao
 import com.sunnyweather.android.logic.dao.PlaceDao
 import com.sunnyweather.android.logic.model.Place
 import com.sunnyweather.android.logic.model.Weather
@@ -95,5 +94,21 @@ object Repository {
     fun getSavedPlace() = PlaceDao.getSavedPlace() //获取本地存储的数据
 
     fun isPlacesSaved() = PlaceDao.isPlaceSaved() //判断本地是否有数据
+
+
+    /*
+    * 即使对SharedPreferences文件进行读写操作，也不建议在主线程中进行
+    * 最佳的实现方式是开启一个线程来执行这些比较耗时的任务
+    * 然后通过LiveData对象进行数据返回
+    *
+    * 城市 + 区数据
+    * */
+    fun saveCity(city: String, district: String) = CityDao.saveCity(city, district)
+
+    fun getSavedCity() = CityDao.getSavedCity()
+
+    fun isCitySaved() = CityDao.isCitySaved()
+
+    fun clearCitySaved() = CityDao.clearCitySaved()
 
 }

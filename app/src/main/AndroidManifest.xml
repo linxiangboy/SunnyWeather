@@ -13,6 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SunnyWeather">
 
+        <!--高德地图Key-->
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="663db0d8ce554aa24dca3973b9022481"/>
+
         <activity
             android:name=".ui.weather.WeatherActivity"
             >

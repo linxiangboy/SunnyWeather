@@ -14,7 +14,7 @@ object LogUtil {
 
     private const val ERROR = 5 //只打印错误日志
 
-    private var level = VERBOSE
+    private var level = ERROR
 
     fun v(tag: String, msg: String){
         if (level <= VERBOSE){

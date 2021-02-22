@@ -2,6 +2,7 @@ package com.sunnyweather.android.ui.place
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sunnyweather.android.MainActivity
+import com.sunnyweather.android.Tool.LogUtil
 import com.sunnyweather.android.Tool.showToast
 
 import com.sunnyweather.android.databinding.FragmentPlaceBinding
@@ -45,14 +47,22 @@ class PlaceFragment : Fragment() {
 
         if (activity is MainActivity && viewModel.isPlaceSaved()){ //只有当PlaceFragment被嵌入到MainActivity并且本地存储有数据时才会跳转到WeatherActivity
             val place = viewModel.getSavedPlace()
-            val intent = Intent(context, WeatherActivity::class.java).apply {
-                putExtra("location_lng", place.location.lng)
-                putExtra("location_lat", place.location.lat)
-                putExtra("place_name", place.name)
+            if (viewModel.isCitySaved()){
+                val cityD = viewModel.getSavedCity()
+                val cityDi = splitString(cityD)
+                val intent = Intent(context, WeatherActivity::class.java).apply {
+                    putExtra("location_lng", place.location.lng)
+                    putExtra("location_lat", place.location.lat)
+                    putExtra("place_name", place.name)
+                    putExtra("tag","1")
+                    putExtra("city_name", cityDi[0])
+                    putExtra("district_name",sqlitStringblank(cityDi[1]))
+                }
+                LogUtil.d("yyy","2")
+                startActivity(intent)
+                activity?.finish()
+                return
             }
-            startActivity(intent)
-            activity?.finish()
-            return
         }
 
         val layoutManager = LinearLayoutManager(activity)
@@ -103,5 +113,10 @@ class PlaceFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    private fun splitString(str: String) : List<String> = str.split("&") //按照&格式分割String
+
+    private fun sqlitStringblank(str: String): String = str.replace("\\s".toRegex(), "") //去掉所有空格
+
 
 }

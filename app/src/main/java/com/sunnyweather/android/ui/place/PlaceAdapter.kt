@@ -1,17 +1,26 @@
 package com.sunnyweather.android.ui.place
 
+import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.amap.api.services.core.LatLonPoint
+import com.amap.api.services.geocoder.GeocodeResult
+import com.amap.api.services.geocoder.GeocodeSearch
+import com.amap.api.services.geocoder.RegeocodeQuery
+import com.amap.api.services.geocoder.RegeocodeResult
 import com.sunnyweather.android.MainActivity
+import com.sunnyweather.android.SunnyWeatherApplication
+import com.sunnyweather.android.Tool.LogUtil
 import com.sunnyweather.android.Tool.showToast
 import com.sunnyweather.android.databinding.PlaceItemBinding
 import com.sunnyweather.android.logic.model.Place
 import com.sunnyweather.android.logic.model.Weather
 import com.sunnyweather.android.ui.weather.WeatherActivity
 
-class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: List<Place>) : RecyclerView.Adapter<PlaceAdapter.ViewHolder>() {
+class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: List<Place>) :
+    RecyclerView.Adapter<PlaceAdapter.ViewHolder>() {
 
     class ViewHolder(val mbinding: PlaceItemBinding) : RecyclerView.ViewHolder(mbinding.root)
 
@@ -22,18 +31,22 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
             val position = holder.adapterPosition //返回点击项position
             val place = placeList[position]
             val activity = fragment.activity
-            if (activity is WeatherActivity){ //如果PlaceFragment被嵌入的是WeatherActivity
+            if (activity is WeatherActivity) { //如果PlaceFragment被嵌入的是WeatherActivity
                 activity.mBinding.drawerLayout.closeDrawers() //关闭drawerLayout
                 activity.viewModel.loactionLng = place.location.lng //给WeatherViewModel赋值新的经纬度坐标和地区名称
                 activity.viewModel.locationLat = place.location.lat
                 activity.viewModel.placeName = place.name
                 activity.refreshWeather() //刷新城市的天气信息
+                activity.viewModel.clearCitySaved() //清除CitySaved内的数据
+                activity.refershGeocode() //刷新城市信息
             } else if (activity is MainActivity) { //如果PlaceFragment被嵌入的是MainActivity
                 val intent = Intent(parent.context, WeatherActivity::class.java).apply {
                     putExtra("location_lng", place.location.lng)
                     putExtra("location_lat", place.location.lat)
                     putExtra("place_name", place.name)
+                    putExtra("tag","0")
                 }
+                LogUtil.d("yyy","1")
                 fragment.startActivity(intent)
                 activity?.finish()
             } else {
@@ -53,5 +66,6 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
     }
 
     override fun getItemCount() = placeList.size
+
 
 }

@@ -39,4 +39,11 @@ class PlaceViewModel  : ViewModel() {
 
     fun isPlaceSaved() = Repository.isPlacesSaved()
 
+
+    fun getSavedCity() = Repository.getSavedCity()
+
+    fun isCitySaved() = Repository.isCitySaved()
+
+    fun clearCitySaved() = Repository.clearCitySaved()
+
 }
