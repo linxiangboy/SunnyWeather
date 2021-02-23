@@ -33,7 +33,33 @@
 
     </FrameLayout>
 
-    <!--滚动控件-->
+    <LinearLayout
+        android:id="@+id/collect_llayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_below="@id/actionBarLayout"
+        android:visibility="gone"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:text="我的收藏"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="20dp"
+            />
+
+        <!--收藏列表 滚动控件-->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/collect_recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+    </LinearLayout>
+
+    <!--搜索 滚动控件-->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"

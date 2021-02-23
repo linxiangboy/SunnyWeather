@@ -20,7 +20,7 @@ class WeatherViewModel : ViewModel() {
 
     var districtName = ""
 
-    var tag = ""
+    var tag = ""  //根据tag0/1控制是否开启网络请求获取城市信息 1不获取 0获取
 
     val weatherLiveData = Transformations.switchMap(locationLiveData) { location ->
         Repository.refreshWeather(location.lng, location.lat)
@@ -31,7 +31,7 @@ class WeatherViewModel : ViewModel() {
     }
 
     /*
-    * 在ViewModel中进行多一次封装
+    * 在ViewModel中进行多一次封装，CityDao
     * */
     fun saveCity(city: String, district: String) = Repository.saveCity(city, district)
 

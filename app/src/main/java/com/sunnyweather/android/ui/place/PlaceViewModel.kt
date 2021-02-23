@@ -4,6 +4,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.sunnyweather.android.logic.Repository
+import com.sunnyweather.android.logic.model.CollectRealtimeResponse
+import com.sunnyweather.android.logic.model.CollectResponse
+import com.sunnyweather.android.logic.model.Location
 import com.sunnyweather.android.logic.model.Place
 
 class PlaceViewModel  : ViewModel() {
@@ -30,6 +33,16 @@ class PlaceViewModel  : ViewModel() {
         searchLiveData.value = query
     }
 
+
+    private val collectLocationLiveData = MutableLiveData<Location>()
+    val collectList = ArrayList<CollectResponse>() //用于对界面上显示的数据进行缓存
+    val collectLiveData = Transformations.switchMap(collectLocationLiveData){ location ->
+        Repository.refreshCollect(location.lng, location.lat)
+    }
+    fun refreshCollect(lng: String, lat: String){
+        collectLocationLiveData.value = Location(lng, lat)
+    }
+
     /*
     * 在ViewModel中进行多一次封装
     * */
@@ -40,6 +53,9 @@ class PlaceViewModel  : ViewModel() {
     fun isPlaceSaved() = Repository.isPlacesSaved()
 
 
+    /*
+    * 具体城市名,CityDao
+    * */
     fun getSavedCity() = Repository.getSavedCity()
 
     fun isCitySaved() = Repository.isCitySaved()

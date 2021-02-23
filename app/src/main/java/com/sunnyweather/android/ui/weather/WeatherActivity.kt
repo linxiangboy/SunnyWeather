@@ -68,7 +68,7 @@ class WeatherActivity : AppCompatActivity(), GeocodeSearch.OnGeocodeSearchListen
         }
         if (viewModel.tag.isEmpty()) {
             val tag = intent.getStringExtra("tag")
-            if (tag == "1") {
+            if (tag == "1") {  //根据tag0/1控制是否开启网络请求获取城市信息
                 cityisEmpty() //判断要不要获取city_name和district_name
             } else {
                 refershGeocode() //获取城市信息
@@ -126,7 +126,7 @@ class WeatherActivity : AppCompatActivity(), GeocodeSearch.OnGeocodeSearchListen
         mBinding.swipeRefresh.setColorSchemeResources(R.color.colorPrimary) //设置下拉刷新进度条显示颜色
         refreshWeather() //执行一次网络请求并显示下拉控件进度条
         if (!viewModel.isCitySaved()) {
-            refershGeocode() //执行一次城市网络请求
+            refershGeocode() //执行一次城市网络请求 第一次打开软件时加载，后续根据tag0/1控制是否开启网络请求
         }
         mBinding.swipeRefresh.setOnRefreshListener { refreshWeather() }
     }

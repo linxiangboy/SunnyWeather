@@ -61,6 +61,25 @@ object Repository {
         }
     }
 
+    fun refreshCollect(lng: String, lat: String) = fire(Dispatchers.IO){
+        coroutineScope {
+            val deferredCollect = async{
+                SunnyWeatherNetwork.getRealtimeWeatherCollect(lng, lat)
+            }
+            val collectResponse = deferredCollect.await()
+            if (collectResponse.status == "ok"){
+//                val collect = collectResponse.result.realtime
+                Result.success(collectResponse)
+            } else {
+                Result.failure(
+                    RuntimeException(
+                        "realtime response status is ${collectResponse.status}"
+                    )
+                )
+            }
+        }
+    }
+
 
     /*
     * 一个按照liveData()函数的参数接受标准定义的一个高阶函数

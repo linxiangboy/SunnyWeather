@@ -24,6 +24,9 @@ object SunnyWeatherNetwork {
 
     suspend fun getRealtimeWeather(lng: String, lat: String) =
         weatherService.getRealtimeWeather(lng, lat).await()
+
+    suspend fun getRealtimeWeatherCollect(lng: String, lat: String) =
+        weatherService.getRealtimeWeatherCollect(lng, lat).await()
 }
 
 
