@@ -5,10 +5,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.sunnyweather.android.MainActivity
-import com.sunnyweather.android.Tool.showToast
+import com.sunnyweather.android.tool.showToast
 import com.sunnyweather.android.databinding.PlaceItemBinding
 import com.sunnyweather.android.logic.model.Place
-import com.sunnyweather.android.logic.model.Weather
 import com.sunnyweather.android.ui.weather.WeatherActivity
 
 class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: List<Place>) : RecyclerView.Adapter<PlaceAdapter.ViewHolder>() {
@@ -24,7 +23,7 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
             val activity = fragment.activity
             if (activity is WeatherActivity){ //如果PlaceFragment被嵌入的是WeatherActivity
                 activity.mBinding.drawerLayout.closeDrawers() //关闭drawerLayout
-                activity.viewModel.loactionLng = place.location.lng //给WeatherViewModel赋值新的经纬度坐标和地区名称
+                activity.viewModel.locationLng = place.location.lng //给WeatherViewModel赋值新的经纬度坐标和地区名称
                 activity.viewModel.locationLat = place.location.lat
                 activity.viewModel.placeName = place.name
                 activity.refreshWeather() //刷新城市的天气信息
@@ -35,7 +34,7 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
                     putExtra("place_name", place.name)
                 }
                 fragment.startActivity(intent)
-                activity?.finish()
+                activity.finish()
             } else {
                 "其他布局".showToast()
             }

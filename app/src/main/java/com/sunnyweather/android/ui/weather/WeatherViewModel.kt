@@ -3,16 +3,17 @@ package com.sunnyweather.android.ui.weather
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import com.sunnyweather.android.Tool.LogUtil
 import com.sunnyweather.android.logic.Repository
 import com.sunnyweather.android.logic.model.Location
-import com.sunnyweather.android.logic.model.Place
 
 class WeatherViewModel : ViewModel() {
 
     private val locationLiveData = MutableLiveData<Location>()
 
-    var loactionLng = ""
+    /*
+    * 推出程序之后再重新打开会被清除的数据
+    * */
+    var locationLng = ""
 
     var locationLat = ""
 

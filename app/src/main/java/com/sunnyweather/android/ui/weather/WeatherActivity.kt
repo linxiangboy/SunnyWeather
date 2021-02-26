@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowInsets
@@ -17,12 +16,19 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.bigkoo.pickerview.builder.OptionsPickerBuilder
+import com.bigkoo.pickerview.listener.OnOptionsSelectListener
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.sunnyweather.android.R
-import com.sunnyweather.android.Tool.LogUtil
-import com.sunnyweather.android.Tool.showToast
+import com.sunnyweather.android.tool.LogUtil
+import com.sunnyweather.android.tool.showToast
 import com.sunnyweather.android.databinding.ActivityWeatherBinding
+import com.sunnyweather.android.logic.model.AddressInfoPO
+import com.sunnyweather.android.logic.model.PCACodePO
 import com.sunnyweather.android.logic.model.Weather
 import com.sunnyweather.android.logic.model.getSky
+import com.sunnyweather.android.tool.FileUtil
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -47,8 +53,8 @@ class WeatherActivity : AppCompatActivity() {
         * 并复制到WeatherViewModel相应的变量中，然后对weatherLiveData进行观察
         * 当获取到服务器返回的天气数据时，就调用showWeatherInfo()方法进行解析和展示
         * */
-        if (viewModel.loactionLng.isEmpty()){
-            viewModel.loactionLng = intent.getStringExtra("location_lng") ?: ""
+        if (viewModel.locationLng.isEmpty()){
+            viewModel.locationLng = intent.getStringExtra("location_lng") ?: ""
         }
         if (viewModel.locationLat.isEmpty()){
             viewModel.locationLat = intent.getStringExtra("location_lat") ?: ""
@@ -56,6 +62,10 @@ class WeatherActivity : AppCompatActivity() {
         if (viewModel.placeName.isEmpty()){
             viewModel.placeName = intent.getStringExtra("place_name") ?: ""
         }
+
+//        viewModel.locationLng = "114.246899"
+//        viewModel.locationLat = "22.720968"
+
         viewModel.weatherLiveData.observe(this, Observer { result ->
             val weather = result.getOrNull()
             if (weather != null) {
@@ -66,6 +76,11 @@ class WeatherActivity : AppCompatActivity() {
             }
             mBinding.swipeRefresh.isRefreshing = false //下拉刷新结束,隐藏进度条
         })
+
+        //三级城市选项器
+        mBinding.now.searchBtn.setOnClickListener {
+            initAddressPicker()
+        }
 
         //打开DrawerLayout
         mBinding.now.navBtn.setOnClickListener { mBinding.drawerLayout.openDrawer(GravityCompat.START) }
@@ -95,10 +110,13 @@ class WeatherActivity : AppCompatActivity() {
     }
 
     private fun showWeatherInfo(weather: Weather){
-        mBinding.now.placeName.text = viewModel.placeName //城市名数据
-
         val realtime = weather.realtime  //RealtimeResponse.Realtime数据
         val daily = weather.daily  //DailyResponse.Daily数据
+        val addressComponent = weather.addressComponent
+
+        mBinding.now.cityName.text = addressComponent.city //城市名数据
+        mBinding.now.districtName.text = addressComponent.district //地区名数据
+
 
         // 填充now.xml布局中的数据
         val currentTempText = "${realtime.temperature.toInt()} °C" //当前温度
@@ -140,7 +158,7 @@ class WeatherActivity : AppCompatActivity() {
     }
 
     fun refreshWeather(){ //执行一次网络请求并显示下拉控件进度条
-        viewModel.refreshWeather(viewModel.loactionLng, viewModel.locationLat)
+        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
         mBinding.swipeRefresh.isRefreshing = true
     }
 
@@ -165,4 +183,63 @@ class WeatherActivity : AppCompatActivity() {
         }
         window.statusBarColor = Color.TRANSPARENT // 将状态栏设置成透明色
     }
+
+    private fun showAddressPicker(provinceItems: MutableList<AddressInfoPO>,
+                                  cityItems: MutableList<MutableList<AddressInfoPO>>,
+                                  districtItems: MutableList<MutableList<MutableList<AddressInfoPO>>>) {
+        val addressPv = OptionsPickerBuilder(this, OnOptionsSelectListener { options1, options2, options3, v ->
+                //点击确定按钮之后触发
+                provinceItems[options1] //省份
+                cityItems[options1][options2]//城市
+                districtItems[options1][options2][options3]//区
+            LogUtil.d("${provinceItems[options1].pickerViewText}${cityItems[options1][options2].pickerViewText}" +
+                    "${districtItems[options1][options2][options3].pickerViewText}")
+            }).setTitleText("请选择地区")
+                .setDividerColor(Color.BLACK)
+                .setTextColorCenter(Color.BLACK) //设置选中项文字颜色
+                .setContentTextSize(20)
+                .build<AddressInfoPO>()
+        addressPv.setPicker(provinceItems, cityItems, districtItems)
+        addressPv.show()
+    }
+
+    /**
+     * 初始化地址数据
+     */
+    fun initAddressPicker() {
+        val provinceItems = mutableListOf<AddressInfoPO>()
+        val cityItems = mutableListOf<MutableList<AddressInfoPO>>()
+        val districtItems = mutableListOf<MutableList<MutableList<AddressInfoPO>>>()
+        //Json2Bean
+        val pcaCodeList = Gson().fromJson<MutableList<PCACodePO>>(FileUtil.getAssetsFileText(this, "pcacode.json"), object : TypeToken<MutableList<PCACodePO>>() {}.type)
+        //遍历省
+        pcaCodeList.forEach {pcaCode ->
+            //存放省内市区
+            val cityList= mutableListOf<AddressInfoPO>()
+            //存放省内所有辖区
+            val areaList= mutableListOf<MutableList<AddressInfoPO>>()
+            //遍历省内市区
+            pcaCode.children.forEach { cCode ->
+                //添加省内市区
+                cityList.add(AddressInfoPO(cCode.code,cCode.name))
+                //存放市内辖区
+                val areas= mutableListOf<AddressInfoPO>()
+                //添加市内辖区
+                cCode.children.forEach {addressInfo->
+                    areas.add(addressInfo)
+                }
+                areaList.add(areas)
+            }
+            //添加省份
+            provinceItems.add(AddressInfoPO(pcaCode.code,pcaCode.name))
+            //添加市区
+            cityItems.add(cityList)
+            //添加辖区
+            districtItems.add(areaList)
+        }
+        //显示选择器
+        showAddressPicker(provinceItems,cityItems,districtItems)
+    }
+
+
 }

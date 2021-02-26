@@ -2,10 +2,13 @@ package com.sunnyweather.android.logic.network
 
 import com.sunnyweather.android.SunnyWeatherApplication
 import com.sunnyweather.android.logic.model.DailyResponse
+import com.sunnyweather.android.logic.model.DistrictResponse
+import com.sunnyweather.android.logic.model.Location
 import com.sunnyweather.android.logic.model.RealtimeResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface WeatherService {
 
@@ -25,5 +28,14 @@ interface WeatherService {
     @GET("v2.5/${SunnyWeatherApplication.TOKEN}/{lng},{lat}/daily.json")
     fun getDailyWeather(@Path("lng") lng: String, @Path("lat") lat: String):
             Call<DailyResponse>
+
+
+    /*
+    * https://restapi.amap.com/v3/geocode/regeo?key=1d18680afacd7c5380e1c6fca867805b&location=114.246899,22.720968
+    * &poitype=&radius=&extensions=base&batch=false&roadlevel=
+    * */
+    @GET("v3/geocode/regeo?key=${SunnyWeatherApplication.GeoKey}&poitype=&radius=&extensions=base&batch=false&roadlevel=")
+    fun getDistrict(@Query("location") location: String):
+            Call<DistrictResponse>
 
 }

@@ -18,4 +18,17 @@ object ServiceCreator {
     //不带参数的create
     inline fun <reified T> create(): T = create(T::class.java)
 
+
+
+    private const val BASE_URL_Geo = "https://restapi.amap.com/" //高德地图根地址
+
+    private val retrofit1 = Retrofit.Builder()
+        .baseUrl(BASE_URL_Geo)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    fun <T> createGeo(serviceCall: Class<T>): T = retrofit1.create(serviceCall)
+
+    inline fun <reified T> createGeo(): T = createGeo(T::class.java)
+
 }

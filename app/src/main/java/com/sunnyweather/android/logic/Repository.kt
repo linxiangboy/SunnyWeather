@@ -1,8 +1,7 @@
 package com.sunnyweather.android.logic
 
 import androidx.lifecycle.liveData
-import com.sunnyweather.android.Tool.LogUtil
-import com.sunnyweather.android.logic.Repository.savePlace
+import com.sunnyweather.android.tool.LogUtil
 import com.sunnyweather.android.logic.dao.PlaceDao
 import com.sunnyweather.android.logic.model.Place
 import com.sunnyweather.android.logic.model.Weather
@@ -43,19 +42,26 @@ object Repository {
             val deferredDaily = async {
                 SunnyWeatherNetwork.getDailyWeather(lng, lat)
             }
+            val deferredDistrict = async {
+                SunnyWeatherNetwork.getDistrict("$lng,$lat")
+            }
             val realtimeResponse = deferredRealtime.await()
             val dailyResponse = deferredDaily.await()
-            if (realtimeResponse.status == "ok" && dailyResponse.status == "ok") { //成功 包装获取到的实时天气信息和未来天气信息
+            val districtResponse = deferredDistrict.await()
+            if (realtimeResponse.status == "ok" && dailyResponse.status == "ok" && districtResponse.status == "1") { //成功 包装获取到的实时天气信息和未来天气信息
                 val weather = Weather(
                     realtimeResponse.result.realtime,
-                    dailyResponse.result.daily
+                    dailyResponse.result.daily,
+                    districtResponse.regeocode.addressComponent
                 )
+                LogUtil.d(districtResponse.toString())
                 Result.success(weather)
             } else { //失败,打印具体情况
                 Result.failure(
                     RuntimeException(
                         "realtime response status is ${realtimeResponse.status} " +
-                                "daily response status is ${dailyResponse.status}"
+                                "daily response status is ${dailyResponse.status} " +
+                                "district response info is ${districtResponse.info}"
                     )
                 )
             }

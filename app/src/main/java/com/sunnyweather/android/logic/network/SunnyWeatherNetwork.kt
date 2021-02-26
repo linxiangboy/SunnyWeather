@@ -1,6 +1,5 @@
 package com.sunnyweather.android.logic.network
 
-import com.sunnyweather.android.Tool.LogUtil
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -24,6 +23,11 @@ object SunnyWeatherNetwork {
 
     suspend fun getRealtimeWeather(lng: String, lat: String) =
         weatherService.getRealtimeWeather(lng, lat).await()
+
+    private val districtService = ServiceCreator.createGeo<WeatherService>()
+
+    suspend fun getDistrict(location: String) =
+        districtService.getDistrict(location).await()
 }
 
 

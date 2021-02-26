@@ -1,4 +1,4 @@
-package com.sunnyweather.android.Tool
+package com.sunnyweather.android.tool
 
 import android.util.Log
 
@@ -22,7 +22,7 @@ object LogUtil {
         }
     }
 
-    fun d(tag: String, msg: String){
+    fun d(msg: String, tag: String = "yyy"){
         if (level <= DEBUG){
             Log.d(tag, msg)
         }

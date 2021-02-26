@@ -1,7 +1,9 @@
 package com.sunnyweather.android.ui.place
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sunnyweather.android.MainActivity
-import com.sunnyweather.android.Tool.showToast
+import com.sunnyweather.android.tool.showToast
 
 import com.sunnyweather.android.databinding.FragmentPlaceBinding
 import com.sunnyweather.android.ui.weather.WeatherActivity
@@ -40,6 +42,7 @@ class PlaceFragment : Fragment() {
         return binding.root
     }
 
+    //确保与fragment相关联的Activity已经创建完毕时调用
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
@@ -99,9 +102,10 @@ class PlaceFragment : Fragment() {
         })
     }
 
-    override fun onDestroyView() {
+    override fun onDestroyView() { //当与Fragment关联的视图被移除时调用
         super.onDestroyView()
         _binding = null
     }
+
 
 }

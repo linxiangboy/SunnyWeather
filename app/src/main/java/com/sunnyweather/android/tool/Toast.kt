@@ -1,4 +1,4 @@
-package com.sunnyweather.android.Tool
+package com.sunnyweather.android.tool
 
 import android.widget.Toast
 import com.sunnyweather.android.SunnyWeatherApplication

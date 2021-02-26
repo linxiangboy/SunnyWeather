@@ -10,7 +10,7 @@ class SunnyWeatherApplication : Application() {
 
         const val TOKEN = "xqtHpNXnx4xbdE2C" //彩云天气令牌值
 
-        const val KEY = "a261dd713b1543158760e3a58b2b1c5e" //和风天气key
+        const val GeoKey = "1d18680afacd7c5380e1c6fca867805b" //高德天气api key
 
         @SuppressLint("StaticFieldLeak")
         lateinit var context: Context
