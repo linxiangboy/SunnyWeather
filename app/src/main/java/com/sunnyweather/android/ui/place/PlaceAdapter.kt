@@ -23,9 +23,9 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
             val activity = fragment.activity
             if (activity is WeatherActivity){ //如果PlaceFragment被嵌入的是WeatherActivity
                 activity.mBinding.drawerLayout.closeDrawers() //关闭drawerLayout
-                activity.viewModel.locationLng = place.location.lng //给WeatherViewModel赋值新的经纬度坐标和地区名称
-                activity.viewModel.locationLat = place.location.lat
-                activity.viewModel.placeName = place.name
+//                activity.viewModel.locationLng = place.location.lng //给WeatherViewModel赋值新的经纬度坐标和地区名称
+//                activity.viewModel.locationLat = place.location.lat
+//                activity.viewModel.placeName = place.name
                 activity.refreshWeather() //刷新城市的天气信息
             } else if (activity is MainActivity) { //如果PlaceFragment被嵌入的是MainActivity
                 val intent = Intent(parent.context, WeatherActivity::class.java).apply {

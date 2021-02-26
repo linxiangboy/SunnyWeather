@@ -1,5 +1,6 @@
 package com.sunnyweather.android.logic.network
 
+import com.sunnyweather.android.logic.model.QueryLngLatResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -8,26 +9,42 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
+//网络数据源访问入口
 object SunnyWeatherNetwork {
-
+    //搜索城市
     private val placeService = ServiceCreator.create<PlaceService>() //创建PlaceService接口的动态代理对象
 
     suspend fun searchPlaces(query: String) = placeService.searchPlaces(query)
         .await() //定义一个searchPlaces()函数，在这里调用PlaceService接口中定义的searchPlaces()方法，以发起搜索城市数据请求
 
 
+    //获取天气状况
     private val weatherService = ServiceCreator.create<WeatherService>()
 
-    suspend fun getDailyWeather(lng: String, lat: String) =
-        weatherService.getDailyWeather(lng, lat).await()
+    suspend fun getDailyWeather(location: String) =
+        weatherService.getDailyWeather(location).await()
 
-    suspend fun getRealtimeWeather(lng: String, lat: String) =
-        weatherService.getRealtimeWeather(lng, lat).await()
+    suspend fun getRealtimeWeather(location: String) =
+        weatherService.getRealtimeWeather(location).await()
 
+    //lng,lat获取地区名称
     private val districtService = ServiceCreator.createGeo<WeatherService>()
 
     suspend fun getDistrict(location: String) =
         districtService.getDistrict(location).await()
+
+
+    //获取IP地址对应的城市
+    private val queryIpService = ServiceCreator.createGeo<QueryIpLatlngService>()
+
+    suspend fun getQueryIp() = queryIpService.getQueryIp().await()
+
+
+    //用城市名获取经纬度和city
+    private val queryLngLatService = ServiceCreator.createGeo<QueryIpLatlngService>()
+
+    suspend fun getQueryLngLat(address: String) = queryLngLatService.getQueryLngLat(address).await()
+
 }
 
 

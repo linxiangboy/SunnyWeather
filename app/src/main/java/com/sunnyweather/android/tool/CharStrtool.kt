@@ -1,6 +1,6 @@
 package com.sunnyweather.android.tool
 
-object charStrTool {
+object CharStrTool {
 
     fun splitString(str: String) : List<String> = str.split("&") //按照&格式分割String
 

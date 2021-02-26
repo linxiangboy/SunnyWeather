@@ -28,6 +28,7 @@ import com.sunnyweather.android.logic.model.AddressInfoPO
 import com.sunnyweather.android.logic.model.PCACodePO
 import com.sunnyweather.android.logic.model.Weather
 import com.sunnyweather.android.logic.model.getSky
+import com.sunnyweather.android.logic.network.SunnyWeatherNetwork.getQueryLngLat
 import com.sunnyweather.android.tool.FileUtil
 import java.text.SimpleDateFormat
 import java.util.*
@@ -53,18 +54,17 @@ class WeatherActivity : AppCompatActivity() {
         * 并复制到WeatherViewModel相应的变量中，然后对weatherLiveData进行观察
         * 当获取到服务器返回的天气数据时，就调用showWeatherInfo()方法进行解析和展示
         * */
-        if (viewModel.locationLng.isEmpty()){
-            viewModel.locationLng = intent.getStringExtra("location_lng") ?: ""
+        if (viewModel.location.isEmpty()){
+            viewModel.location = intent.getStringExtra("location_lnglat") ?: ""
         }
-        if (viewModel.locationLat.isEmpty()){
-            viewModel.locationLat = intent.getStringExtra("location_lat") ?: ""
+        if (viewModel.cityName.isEmpty()){
+            viewModel.cityName = intent.getStringExtra("city_name") ?: ""
+            mBinding.now.cityName.text = viewModel.cityName //城市名数据
         }
-        if (viewModel.placeName.isEmpty()){
-            viewModel.placeName = intent.getStringExtra("place_name") ?: ""
+        if (viewModel.districtName.isEmpty()){
+            viewModel.districtName = intent.getStringExtra("district_name") ?: ""
+            if (viewModel.districtName!="")     mBinding.now.districtName.text = viewModel.districtName //城市名数据
         }
-
-//        viewModel.locationLng = "114.246899"
-//        viewModel.locationLat = "22.720968"
 
         viewModel.weatherLiveData.observe(this, Observer { result ->
             val weather = result.getOrNull()
@@ -77,9 +77,32 @@ class WeatherActivity : AppCompatActivity() {
             mBinding.swipeRefresh.isRefreshing = false //下拉刷新结束,隐藏进度条
         })
 
+        //三级城市选择器选择城市后触发
+        viewModel.queryLngLatLiveData.observe(this, Observer { result ->
+            val lnglat = result.getOrNull()
+            if (lnglat != null) {
+                viewModel.location = lnglat //存入新的lnglat
+                refreshWeather() //刷新天气
+                viewModel.saveLngLatCity("${viewModel.location}&${viewModel.cityName}&${viewModel.districtName}")
+            } else {
+                "无法成功获取天气信息".showToast()
+                result.exceptionOrNull()?.printStackTrace()
+            }
+            mBinding.swipeRefresh.isRefreshing = false //下拉刷新结束,隐藏进度条
+        })
+
         //三级城市选项器
-        mBinding.now.searchBtn.setOnClickListener {
+        mBinding.now.selectcityLinear.setOnClickListener {
             initAddressPicker()
+        }
+
+        //收藏按钮
+        mBinding.now.collectBox.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked){
+                "收藏".showToast()
+            } else {
+                "取消收藏".showToast()
+            }
         }
 
         //打开DrawerLayout
@@ -112,11 +135,6 @@ class WeatherActivity : AppCompatActivity() {
     private fun showWeatherInfo(weather: Weather){
         val realtime = weather.realtime  //RealtimeResponse.Realtime数据
         val daily = weather.daily  //DailyResponse.Daily数据
-        val addressComponent = weather.addressComponent
-
-        mBinding.now.cityName.text = addressComponent.city //城市名数据
-        mBinding.now.districtName.text = addressComponent.district //地区名数据
-
 
         // 填充now.xml布局中的数据
         val currentTempText = "${realtime.temperature.toInt()} °C" //当前温度
@@ -158,7 +176,8 @@ class WeatherActivity : AppCompatActivity() {
     }
 
     fun refreshWeather(){ //执行一次网络请求并显示下拉控件进度条
-        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+//        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+        viewModel.refreshWeather(viewModel.location)
         mBinding.swipeRefresh.isRefreshing = true
     }
 
@@ -187,13 +206,23 @@ class WeatherActivity : AppCompatActivity() {
     private fun showAddressPicker(provinceItems: MutableList<AddressInfoPO>,
                                   cityItems: MutableList<MutableList<AddressInfoPO>>,
                                   districtItems: MutableList<MutableList<MutableList<AddressInfoPO>>>) {
-        val addressPv = OptionsPickerBuilder(this, OnOptionsSelectListener { options1, options2, options3, v ->
-                //点击确定按钮之后触发
-                provinceItems[options1] //省份
-                cityItems[options1][options2]//城市
-                districtItems[options1][options2][options3]//区
-            LogUtil.d("${provinceItems[options1].pickerViewText}${cityItems[options1][options2].pickerViewText}" +
-                    "${districtItems[options1][options2][options3].pickerViewText}")
+        val addressPv = OptionsPickerBuilder(this, OnOptionsSelectListener { options1, options2, options3, _ ->
+
+            //点击确定按钮之后触发
+            val province = provinceItems[options1].pickerViewText //省份
+            val city = cityItems[options1][options2].pickerViewText//城市
+            val district = districtItems[options1][options2][options3].pickerViewText//区
+            if (city == "市辖区"){
+                viewModel.cityName = province
+                mBinding.now.cityName.text = province
+            } else {
+                viewModel.cityName = city
+                mBinding.now.cityName.text = city
+            }
+            viewModel.districtName = district
+            mBinding.now.districtName.text = district
+            viewModel.getQueryLngLat("$province$city$district")
+
             }).setTitleText("请选择地区")
                 .setDividerColor(Color.BLACK)
                 .setTextColorCenter(Color.BLACK) //设置选中项文字颜色

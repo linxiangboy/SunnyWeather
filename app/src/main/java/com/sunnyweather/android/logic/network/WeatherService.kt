@@ -16,8 +16,8 @@ interface WeatherService {
     * https://api.caiyunapp.com/v2.5/{token}/121.6544,25.1552/realtime.json
     * Path占位符,调用方法发起请求时，Retrofit会自动将参数值替换到占位符的位置
     * */
-    @GET("v2.5/${SunnyWeatherApplication.TOKEN}/{lng},{lat}/realtime.json")
-    fun getRealtimeWeather(@Path("lng") lng: String, @Path("lat") lat: String):
+    @GET("v2.5/${SunnyWeatherApplication.TOKEN}/{location}/realtime.json")
+    fun getRealtimeWeather(@Path("location") location: String):
             Call<RealtimeResponse>
 
 
@@ -25,12 +25,14 @@ interface WeatherService {
     * https://api.caiyunapp.com/v2.5/{token}/121.6544,25.1552/daily.json
     * Path占位符,调用方法发起请求时，Retrofit会自动将参数值替换到占位符的位置
     * */
-    @GET("v2.5/${SunnyWeatherApplication.TOKEN}/{lng},{lat}/daily.json")
-    fun getDailyWeather(@Path("lng") lng: String, @Path("lat") lat: String):
+    @GET("v2.5/${SunnyWeatherApplication.TOKEN}/{location}/daily.json")
+    fun getDailyWeather(@Path("location") location: String):
             Call<DailyResponse>
 
 
     /*
+    * 高德地图逆地理编码API
+    *
     * https://restapi.amap.com/v3/geocode/regeo?key=1d18680afacd7c5380e1c6fca867805b&location=114.246899,22.720968
     * &poitype=&radius=&extensions=base&batch=false&roadlevel=
     * */
