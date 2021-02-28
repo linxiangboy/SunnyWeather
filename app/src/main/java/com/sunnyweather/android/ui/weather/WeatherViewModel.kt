@@ -1,5 +1,6 @@
 package com.sunnyweather.android.ui.weather
 
+import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
@@ -12,6 +13,16 @@ class WeatherViewModel : ViewModel() {
 
     var districtName = ""
 
+    var realtime = ""
+
+    var daily = ""
+
+    var collectTag = 0 //0 = 未收藏; 1 = 收藏
+
+    var homecity = "false" //是否为主页城市 false不是 true是
+
+
+    //传入lnglat获取天气数据
     private val locationLiveData = MutableLiveData<String>()
 
     val weatherLiveData = Transformations.switchMap(locationLiveData) { location ->
@@ -23,7 +34,7 @@ class WeatherViewModel : ViewModel() {
     }
 
 
-    //传入地区名获取天气信息
+    //传入地区名获取lnglat数据
     private val lnglatLiveData = MutableLiveData<String>()
 
     val queryLngLatLiveData = Transformations.switchMap(lnglatLiveData){ address ->
@@ -35,7 +46,10 @@ class WeatherViewModel : ViewModel() {
     }
 
 
-    fun saveLngLatCity(lnglatCity: String) = Repository.saveLngLatCity(lnglatCity)
+//    fun saveLngLatCity(lnglatCity: String) = Repository.saveLngLatCity(lnglatCity)
+
+
+    fun CreateMenuSqlDao(context: Context, name: String, version: Int) = Repository.CreateMenuSqlDao(context, name, version)
 
 
 }

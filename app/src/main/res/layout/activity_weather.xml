@@ -7,61 +7,81 @@
     android:layout_height="match_parent"
     >
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefresh"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         >
 
-        <!--scrollbars不显示滚动条    overScrollMode过度滚动-->
-        <ScrollView
-            android:id="@+id/weatherLayout"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:overScrollMode="never"
-            android:scrollbars="none"
-            android:visibility="invisible">
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            >
 
-            <!--由于ScrollView内部只允许存在一个直接子布局，所以嵌套了一个垂直方向的LinearLayout-->
-            <LinearLayout
+            <!--scrollbars不显示滚动条    overScrollMode过度滚动-->
+            <ScrollView
+                android:id="@+id/weatherLayout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="match_parent"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                android:visibility="invisible">
 
-                <include
-                    android:id="@+id/now"
-                    layout="@layout/now" />
+                <!--由于ScrollView内部只允许存在一个直接子布局，所以嵌套了一个垂直方向的LinearLayout-->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-                <include
-                    android:id="@+id/forecast"
-                    layout="@layout/forecast" />
+                    <include
+                        android:id="@+id/now"
+                        layout="@layout/now" />
 
-                <include
-                    android:id="@+id/life_index"
-                    layout="@layout/life_index" />
+                    <include
+                        android:id="@+id/forecast"
+                        layout="@layout/forecast" />
 
-            </LinearLayout>
+                    <include
+                        android:id="@+id/life_index"
+                        layout="@layout/life_index" />
 
-        </ScrollView>
+                </LinearLayout>
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+            </ScrollView>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_home"
+            app:elevation="8dp"
+            />
+
+    </RelativeLayout>
+
+
 
     <!--android:clickable="true" 解决FrameLayout点击事件穿透问题-->
     <!--android:focusable="true" 截断EditText自动获取焦点-->
     <FrameLayout
-        android:layout_width="match_parent"
+        android:layout_width="320dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:clickable="true"
         android:focusable="true"
-        android:background="@color/colorPrimary"
         >
 
         <!--下移25dp避免挡住状态栏-->
         <fragment
-            android:id="@+id/placeFragment"
-            android:name="com.sunnyweather.android.ui.place.PlaceFragment"
+            android:id="@+id/menuFragment"
+            android:name="com.sunnyweather.android.ui.menu.MenuFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="25dp"

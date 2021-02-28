@@ -16,6 +16,7 @@ import com.sunnyweather.android.MainActivity
 import com.sunnyweather.android.tool.showToast
 
 import com.sunnyweather.android.databinding.FragmentPlaceBinding
+import com.sunnyweather.android.tool.LogUtil
 import com.sunnyweather.android.ui.weather.WeatherActivity
 
 class PlaceFragment : Fragment() {
@@ -69,7 +70,7 @@ class PlaceFragment : Fragment() {
             val content = editable.toString()
             if (content.isNotEmpty()){ //不为空
                 viewModel.searchPlaces(content) //发起网络请求
-            } else{
+            } else {
                 _binding?.recyclerView?.visibility = View.GONE //滚动控件隐藏
                 _binding?.bgImaeView?.visibility = View.VISIBLE //背景图片显示
                 viewModel.placeList.clear() //清除placeList中的数据
@@ -105,6 +106,11 @@ class PlaceFragment : Fragment() {
     override fun onDestroyView() { //当与Fragment关联的视图被移除时调用
         super.onDestroyView()
         _binding = null
+    }
+
+    fun refreshAdapter(){
+        LogUtil.d("刷新")
+//        adapter.notifyDataSetChanged() //刷新RecyclerView
     }
 
 

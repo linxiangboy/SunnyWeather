@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ghostwhite">
+
+    <TextView
+        android:id="@+id/collecttext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:text="我的收藏"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="20dp"
+        />
+
+    <!--下方背景图片展示-->
+    <ImageView
+        android:id="@+id/bgImaeView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/bg_place"
+        />
+
+    <!--滚动控件-->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/collecttext"
+        android:visibility="gone"
+        />
+
+</RelativeLayout>

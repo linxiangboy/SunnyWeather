@@ -1,6 +1,9 @@
 package com.sunnyweather.android.logic
 
+import android.content.Context
 import androidx.lifecycle.liveData
+import com.sunnyweather.android.logic.dao.LngLatCityDao
+import com.sunnyweather.android.logic.dao.MenuDao
 import com.sunnyweather.android.logic.dao.PlaceDao
 import com.sunnyweather.android.logic.model.LngLatCity
 import com.sunnyweather.android.logic.model.Place
@@ -26,6 +29,38 @@ object Repository {
             Result.success(places) //包装获取的城市数据列表
         } else {
             Result.failure(RuntimeException("response status is ${placeResponse.status}"))
+        }
+    }
+
+
+    fun refreshWeatherList(locationlist: List<String>) = fire(Dispatchers.IO){
+        var weatherlist = mutableListOf<Weather>()
+        var resultNum = 0
+        coroutineScope {
+            for(location in locationlist){
+                val deferredRealtime = async {
+                    SunnyWeatherNetwork.getRealtimeWeather(location)
+                }
+                val deferredDaily = async {
+                    SunnyWeatherNetwork.getDailyWeather(location)
+                }
+                val realtimeResponse = deferredRealtime.await()
+                val dailyResponse = deferredDaily.await()
+                if (realtimeResponse.status == "ok" && dailyResponse.status == "ok") { //成功 包装获取到的实时天气信息和未来天气信息
+                    val weather = Weather(realtimeResponse.result.realtime,
+                        dailyResponse.result.daily)
+                    weatherlist.add(weather) //将天气数据添加到weatherlist中
+                } else { //失败,打印具体情况
+                    resultNum = 1
+                    break
+                }
+            }
+            //进行判断是否有请求错误的，如果有Result.failure,如果没有Result.success
+            if (resultNum == 0){
+                Result.success(weatherlist)
+            } else {
+                Result.failure(RuntimeException("请求失败！"))
+            }
         }
     }
 
@@ -108,41 +143,43 @@ object Repository {
     }
 
 
-
-/*
-* 一个按照liveData()函数的参数接受标准定义的一个高阶函数
-* 在liveData()函数代码中进行统一的try catch处理
-* 并在try语句中调用传入的Lambda表达式中的代码
-* 最终获取Lambda表达式的执行结果并调用emit()方法发射出去
-*
-* 注意，在liveData()函数代码块中我们是拥有挂起函数上下文的，可当回调到Lambdaa表达式中代码就没有挂起函数上下文了，
-* 但实际上Lambda表达式中的代码一定也是在挂起函数中运行的，
-* 所以我们需要声明一个suspend关键字表示在所有传入的Lambda表达式中的代码也是拥有挂起函数上下文的
-*
-* suspend是函数的创建者对函数的调用者的提醒，"我"是一个耗时操作，被我的创建者放在了后台运行
-* */
-private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
-    liveData<Result<T>>(context) {
-        val result = try {
-            block()
-        } catch (e: Exception) {
-            Result.failure<T>(e)
+    /*
+    * 一个按照liveData()函数的参数接受标准定义的一个高阶函数
+    * 在liveData()函数代码中进行统一的try catch处理
+    * 并在try语句中调用传入的Lambda表达式中的代码
+    * 最终获取Lambda表达式的执行结果并调用emit()方法发射出去
+    *
+    * 注意，在liveData()函数代码块中我们是拥有挂起函数上下文的，可当回调到Lambdaa表达式中代码就没有挂起函数上下文了，
+    * 但实际上Lambda表达式中的代码一定也是在挂起函数中运行的，
+    * 所以我们需要声明一个suspend关键字表示在所有传入的Lambda表达式中的代码也是拥有挂起函数上下文的
+    *
+    * suspend是函数的创建者对函数的调用者的提醒，"我"是一个耗时操作，被我的创建者放在了后台运行
+    * */
+    private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
+        liveData<Result<T>>(context) {
+            val result = try {
+                block()
+            } catch (e: Exception) {
+                Result.failure<T>(e)
+            }
+            emit(result)
         }
-        emit(result)
-    }
 
-/*
-* 即使对SharedPreferences文件进行读写操作，也不建议在主线程中进行
-* 最佳的实现方式是开启一个线程来执行这些比较耗时的任务
-* 然后通过LiveData对象进行数据返回
-* */
-fun savePlace(place: Place) = PlaceDao.savePlace(place) //将数据存储到本地
-fun getSavedPlace() = PlaceDao.getSavedPlace() //获取本地存储的数据
-fun isPlacesSaved() = PlaceDao.isPlaceSaved() //判断本地是否有数据
+    /*
+    * 即使对SharedPreferences文件进行读写操作，也不建议在主线程中进行
+    * 最佳的实现方式是开启一个线程来执行这些比较耗时的任务
+    * 然后通过LiveData对象进行数据返回
+    * */
+    fun savePlace(place: Place) = PlaceDao.savePlace(place) //将数据存储到本地
+    fun getSavedPlace() = PlaceDao.getSavedPlace() //获取本地存储的数据
+    fun isPlacesSaved() = PlaceDao.isPlaceSaved() //判断本地是否有数据
 
 
-fun saveLngLatCity(lnglatCity: String) = PlaceDao.saveLngLatCity(lnglatCity)
-fun getSavedLngLatCity() = PlaceDao.getSavedLngLatCity()
-fun isLngLatCitySaved() = PlaceDao.isLngLatCitySaved()
+    fun saveLngLatCity(lnglatCity: String) = LngLatCityDao.saveLngLatCity(lnglatCity)
+    fun getSavedLngLatCity() = LngLatCityDao.getSavedLngLatCity()
+    fun isLngLatCitySaved() = LngLatCityDao.isLngLatCitySaved()
+
+
+    fun CreateMenuSqlDao(context: Context, name: String, version: Int) = MenuDao.CreateMenuSqlDao(context, name, version)
 
 }
