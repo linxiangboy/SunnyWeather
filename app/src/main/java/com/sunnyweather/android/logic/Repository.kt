@@ -5,6 +5,7 @@ import androidx.lifecycle.liveData
 import com.sunnyweather.android.logic.dao.LngLatCityDao
 import com.sunnyweather.android.logic.dao.MenuDao
 import com.sunnyweather.android.logic.dao.PlaceDao
+import com.sunnyweather.android.logic.model.CitydisWeather
 import com.sunnyweather.android.logic.model.LngLatCity
 import com.sunnyweather.android.logic.model.Place
 import com.sunnyweather.android.logic.model.Weather

@@ -87,8 +87,10 @@ class WeatherActivity : AppCompatActivity() {
                 viewModel.realtime = Gson().toJson(weather.realtime)
                 viewModel.daily = Gson().toJson(weather.daily)
                 showWeatherInfo(weather) //刷新界面
-                HomeCityWeatherData(weather) //更新sql中的数据
-                Menufragment.refreshAdapter() //刷新recyclerview
+                if (mBinding.now.collectBox.isChecked){ //如果此时收藏按钮是收藏状态
+                    refreshWeatherData(weather) //更新sql中的数据
+                    Menufragment.refreshAdapter() //刷新recyclerview
+                }
             } else {
                 "无法成功获取天气信息".showToast()
                 result.exceptionOrNull()?.printStackTrace()
@@ -159,7 +161,7 @@ class WeatherActivity : AppCompatActivity() {
             }
 
             override fun onDrawerOpened(drawerView: View) { //drawer打开的时候执行
-                refreshWeather()
+
             }
 
             override fun onDrawerClosed(drawerView: View) { //drawer关闭的时候执行
@@ -386,6 +388,8 @@ class WeatherActivity : AppCompatActivity() {
                     changefabBtn() //悬浮按钮隐藏/显示
                 } else { //未收藏
                     viewModel.getQueryLngLat("$province$city$district") //传入地区名获取天气数据
+//                    refreshWeather()
+
                     viewModel.collectTag = 1 //不允许触发点击事件
                     mBinding.now.collectBox.isChecked = false //变为未收藏按钮
                     viewModel.collectTag = 0 //点击之后允许触发点击事件
@@ -533,10 +537,10 @@ class WeatherActivity : AppCompatActivity() {
         }
     }
 
-    //更新主页城市的天气情况数据
-    private fun HomeCityWeatherData(weather: Weather) {
+    //更新已收藏城市的天气情况数据
+    private fun refreshWeatherData(weather: Weather) {
         val db = dbHelper.writableDatabase //创建数据库
-        val cursor = db.query("MenuSql", null, "homecity=?", arrayOf("true"), null, null, null)
+        val cursor = db.query("MenuSql", null, "citydis=?", arrayOf("${viewModel.cityName}${viewModel.districtName}"), null, null, null)
         val values = ContentValues().apply {
             put("realtime", Gson().toJson(weather.realtime))
             put("daily", Gson().toJson(weather.daily))
