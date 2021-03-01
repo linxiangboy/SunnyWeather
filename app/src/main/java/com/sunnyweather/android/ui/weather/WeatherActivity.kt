@@ -378,7 +378,7 @@ class WeatherActivity : AppCompatActivity() {
                 mBinding.now.districtName.text = district
 
                 if (isCollectMenuSql(city, district)) { //已收藏
-                    val weather = QueryMenuSqlWeather(city, district) //取出sql内的天气数据
+                    val weather = queryMenuSqlWeather(city, district) //取出sql内的天气数据
                     refreshShowWeather(weather) //刷新界面
                     viewModel.collectTag = 1 //不允许触发点击事件
                     mBinding.now.collectBox.isChecked = true //变为已收藏按钮
@@ -436,21 +436,29 @@ class WeatherActivity : AppCompatActivity() {
     //取消收藏功能
     private fun deleteMenuSql(city: String, district: String) {
         val db = dbHelper.writableDatabase
+        var homecity = "false"
         db.beginTransaction() //开启事务
         try {
+            //查询拿到本次取消收藏的城市的homecity，然后删除
+            val cursor =
+                db.query("MenuSql", null, "citydis=?", arrayOf("$city$district"), null, null, null)
+            if (cursor.moveToFirst()) {
+                homecity = cursor.getString(cursor.getColumnIndex("homecity"))
+            }
             db.delete("MenuSql", "citydis=?", arrayOf("$city$district"))
-            val cursor = db.query("MenuSql", null, null, null, null, null, null)
+            cursor.close()
 
-            //将光标的位置随机
-            if (cursor.count != 0){
+            //如果homecity是true
+            val cursor1 = db.query("MenuSql", null, null, null, null, null, null)
+            if (homecity == "true" && cursor1.count != 0) {
+                //将光标的位置随机 然后将他设为主页城市
                 val rand = (1..cursor.count).random()
                 cursor.move(rand)
                 val values = ContentValues()
                 values.put("homecity", "true")
                 db.update("MenuSql", values, null, null)
             }
-
-            cursor.close()
+            cursor1.close()
             db.setTransactionSuccessful() //事务成功
         } catch (e: Exception) {
             e.printStackTrace()
@@ -476,7 +484,7 @@ class WeatherActivity : AppCompatActivity() {
     }
 
     //将天气数据从sql内取出
-    private fun QueryMenuSqlWeather(city: String, district: String): Weather {
+    private fun queryMenuSqlWeather(city: String, district: String): Weather {
         val db = dbHelper.writableDatabase
         val cursor =
             db.query("MenuSql", null, "citydis=?", arrayOf("$city$district"), null, null, null)
@@ -526,14 +534,14 @@ class WeatherActivity : AppCompatActivity() {
     }
 
     //更新主页城市的天气情况数据
-    private fun HomeCityWeatherData(weather: Weather){
+    private fun HomeCityWeatherData(weather: Weather) {
         val db = dbHelper.writableDatabase //创建数据库
         val cursor = db.query("MenuSql", null, "homecity=?", arrayOf("true"), null, null, null)
-        val values = ContentValues().apply{
+        val values = ContentValues().apply {
             put("realtime", Gson().toJson(weather.realtime))
             put("daily", Gson().toJson(weather.daily))
         }
-        if (cursor.moveToFirst()){
+        if (cursor.moveToFirst()) {
             db.update("MenuSql", values, null, null)
         }
         cursor.close()
