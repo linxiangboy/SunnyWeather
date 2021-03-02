@@ -5,10 +5,7 @@ import androidx.lifecycle.liveData
 import com.sunnyweather.android.logic.dao.LngLatCityDao
 import com.sunnyweather.android.logic.dao.MenuDao
 import com.sunnyweather.android.logic.dao.PlaceDao
-import com.sunnyweather.android.logic.model.CitydisWeather
-import com.sunnyweather.android.logic.model.LngLatCity
-import com.sunnyweather.android.logic.model.Place
-import com.sunnyweather.android.logic.model.Weather
+import com.sunnyweather.android.logic.model.*
 import com.sunnyweather.android.logic.network.SunnyWeatherNetwork
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -34,23 +31,23 @@ object Repository {
     }
 
 
-    fun refreshWeatherList(locationlist: List<String>) = fire(Dispatchers.IO){
-        var weatherlist = mutableListOf<Weather>()
+    fun refreshWeatherList(locationcitydislist: List<LngLatCitydis>) = fire(Dispatchers.IO){
+        var citydisweatherlist = mutableListOf<CitydisWeather>()
         var resultNum = 0
         coroutineScope {
-            for(location in locationlist){
+            for(locationcitydis in locationcitydislist){
                 val deferredRealtime = async {
-                    SunnyWeatherNetwork.getRealtimeWeather(location)
+                    SunnyWeatherNetwork.getRealtimeWeather(locationcitydis.location)
                 }
                 val deferredDaily = async {
-                    SunnyWeatherNetwork.getDailyWeather(location)
+                    SunnyWeatherNetwork.getDailyWeather(locationcitydis.location)
                 }
                 val realtimeResponse = deferredRealtime.await()
                 val dailyResponse = deferredDaily.await()
                 if (realtimeResponse.status == "ok" && dailyResponse.status == "ok") { //成功 包装获取到的实时天气信息和未来天气信息
-                    val weather = Weather(realtimeResponse.result.realtime,
+                    val citydisweather = CitydisWeather(locationcitydis.citydis, realtimeResponse.result.realtime,
                         dailyResponse.result.daily)
-                    weatherlist.add(weather) //将天气数据添加到weatherlist中
+                    citydisweatherlist.add(citydisweather) //将天气数据添加到weatherlist中
                 } else { //失败,打印具体情况
                     resultNum = 1
                     break
@@ -58,7 +55,7 @@ object Repository {
             }
             //进行判断是否有请求错误的，如果有Result.failure,如果没有Result.success
             if (resultNum == 0){
-                Result.success(weatherlist)
+                Result.success(citydisweatherlist)
             } else {
                 Result.failure(RuntimeException("请求失败！"))
             }

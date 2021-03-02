@@ -6,6 +6,7 @@ import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.sunnyweather.android.logic.Repository
 import com.sunnyweather.android.logic.model.LngLatCityDisSkyTem
+import com.sunnyweather.android.logic.model.LngLatCitydis
 import com.sunnyweather.android.logic.model.MenuCollect
 
 
@@ -15,13 +16,13 @@ class MenuViewModel : ViewModel() {
     val menulist = ArrayList<MenuCollect>()
 
 
-    private val locationlistLiveData = MutableLiveData<List<String>>()
+    private val locationlistLiveData = MutableLiveData<List<LngLatCitydis>>()
 
-    val weatherListLiveData = Transformations.switchMap(locationlistLiveData) { location ->
-        Repository.refreshWeatherList(location)
+    val weatherListLiveData = Transformations.switchMap(locationlistLiveData) { lnglatCitydis ->
+        Repository.refreshWeatherList(lnglatCitydis)
     }
 
-    fun refreshWeatherList(location: List<String>){
+    fun refreshWeatherList(location: List<LngLatCitydis>){
         locationlistLiveData.value = location //将传入的经纬度封装成一个Location对象
     }
 

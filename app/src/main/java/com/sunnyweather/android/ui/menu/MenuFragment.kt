@@ -52,10 +52,9 @@ class MenuFragment : Fragment() {
 
         //刷新sqlite内的数据
         viewModel.weatherListLiveData.observe(this, Observer { result ->
-            val weatherlist = result.getOrNull() //不为空
-            if (weatherlist != null) {
-                LogUtil.d(weatherlist.size.toString())
-                setMenuSql(weatherlist) //更新数据库内的天气数据
+            val disweatherlist = result.getOrNull() //不为空
+            if (disweatherlist != null) {
+                setMenuSql(disweatherlist) //更新数据库内的天气数据
             } else {
                 "无法成功获取天气信息".showToast()
                 result.exceptionOrNull()?.printStackTrace()
@@ -135,14 +134,15 @@ class MenuFragment : Fragment() {
     }
 
     //获取location list
-    fun getLngLatMenuSql(): MutableList<String> {
-        var locationlist = mutableListOf<String>()
+    fun getLngLatMenuSql(): MutableList<LngLatCitydis> {
+        var locationlist = mutableListOf<LngLatCitydis>()
         val db = dbHelper.writableDatabase
         val cursor = db.query("MenuSql", null, "homecity=?", arrayOf("false"), null, null, null)
         if (cursor.moveToFirst()) {
             do {
                 val location = cursor.getString(cursor.getColumnIndex("location"))
-                locationlist.add(location)
+                val citydis = cursor.getString(cursor.getColumnIndex("citydis"))
+                locationlist.add(LngLatCitydis(location, citydis))
             } while (cursor.moveToNext())
         }
         cursor.close()
@@ -150,20 +150,29 @@ class MenuFragment : Fragment() {
     }
 
     //更新数据库内的realtime和daily
-    fun setMenuSql(weatherlist: MutableList<Weather>) {
+    fun setMenuSql(disweatherlist: MutableList<CitydisWeather>) {
         Thread{
             val db = dbHelper.writableDatabase
-            val cursor = db.query("MenuSql", null, "homecity=?", arrayOf("false"), null, null, null)
-            if (cursor.moveToFirst()){
-                do {
-                    val values = ContentValues()
-                    values.put("realtime", Gson().toJson(weatherlist[cursor.position].realtime))
-                    values.put("daily", Gson().toJson(weatherlist[cursor.position].daily))
-                    LogUtil.d("${cursor.position} ${cursor.columnCount} ${Gson().toJson(weatherlist[cursor.position].realtime.skycon)}")
-                    db.update("MenuSql", values, null, null)
-                    }while (cursor.moveToNext())
+
+            var values = ContentValues()
+            for (disweather in disweatherlist){
+
+                values.put("realtime", Gson().toJson(disweather.realtime))
+                values.put("daily", Gson().toJson(disweather.daily))
+                db.update("MenuSql", values, "citydis=?", arrayOf("${disweather.citydis}"))
             }
-            cursor.close()
+
+//            val cursor = db.query("MenuSql", null, "homecity=?", arrayOf("false"), null, null, null)
+//            if (cursor.moveToFirst()){
+//                do {
+//                    val values = ContentValues()
+//                    values.put("realtime", Gson().toJson(weatherlist[cursor.position].realtime))
+//                    values.put("daily", Gson().toJson(weatherlist[cursor.position].daily))
+//                    LogUtil.d("${cursor.position} ${cursor.columnCount} ${Gson().toJson(weatherlist[cursor.position].realtime.skycon)}")
+//                    db.update("MenuSql", values, null, null)
+//                    }while (cursor.moveToNext())
+//            }
+//            cursor.close()
         }.start()
 
         refreshAdapter() //刷新界面

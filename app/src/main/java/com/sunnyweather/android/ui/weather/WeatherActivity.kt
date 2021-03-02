@@ -458,11 +458,12 @@ class WeatherActivity : AppCompatActivity() {
                 //将光标的位置随机 然后将他设为主页城市
                 val rand = (1..cursor.count).random()
                 cursor.move(rand)
+                val citydis = cursor.getString(cursor.getColumnIndex("citydis"))
+                cursor1.close()
                 val values = ContentValues()
                 values.put("homecity", "true")
-                db.update("MenuSql", values, null, null)
+                db.update("MenuSql", values, "citydis=?", arrayOf("$citydis"))
             }
-            cursor1.close()
             db.setTransactionSuccessful() //事务成功
         } catch (e: Exception) {
             e.printStackTrace()
@@ -540,15 +541,17 @@ class WeatherActivity : AppCompatActivity() {
     //更新已收藏城市的天气情况数据
     private fun refreshWeatherData(weather: Weather) {
         val db = dbHelper.writableDatabase //创建数据库
-        val cursor = db.query("MenuSql", null, "citydis=?", arrayOf("${viewModel.cityName}${viewModel.districtName}"), null, null, null)
+//        val cursor = db.query("MenuSql", null, "citydis=?", arrayOf("${viewModel.cityName}${viewModel.districtName}"), null, null, null)
         val values = ContentValues().apply {
             put("realtime", Gson().toJson(weather.realtime))
             put("daily", Gson().toJson(weather.daily))
         }
-        if (cursor.moveToFirst()) {
-            db.update("MenuSql", values, null, null)
-        }
-        cursor.close()
+//        if (cursor.moveToFirst()) {
+//            db.update("MenuSql", values, null, null)
+//        }
+        db.update("MenuSql", values, "citydis=?",
+            arrayOf("${viewModel.cityName}${viewModel.districtName}")
+        )
     }
 
 
